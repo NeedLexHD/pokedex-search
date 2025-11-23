@@ -133,8 +133,8 @@ function openPokemon(p) {
   const startStr = String(start).padStart(3, '0');
   const endStr = (end > 1025) ? String(1025).padStart(3, '0') : String(end).padStart(3, '0');
 
-  // Remplacer "pokédex" par "pokedex" sans accent
-  const folder = `pokedex-${startStr}-${endStr}`;
+  // **REMPLACER "pokédex" PAR "pokedex" SANS ACCENT**
+  const folder = `pokedex-${startStr}-${endStr}`; // Ici "pokédex" devient "pokedex"
   const url = `https://sites.google.com/view/lex3d/${folder}/${num}-${nameSlug}`;
 
   console.log(url);  // Affiche l'URL générée pour vérification
