@@ -80,7 +80,7 @@ let pokemonList = [];
 fetch("https://cors-anywhere.herokuapp.com/https://tyradex.app/api/v1/pokemon")
   .then(res => res.json())
   .then(data => {
-    console.log(data); // Affiche la réponse de l'API dans la console
+    console.log(data);  // Affiche la réponse de l'API dans la console
     pokemonList = data.map(p => ({
       id: p.id,
       num: String(p.id).padStart(3, "0"),
@@ -91,6 +91,9 @@ fetch("https://cors-anywhere.herokuapp.com/https://tyradex.app/api/v1/pokemon")
 
 // Normalisation des accents
 function normalize(str) {
+  if (typeof str !== 'string') {
+    return ''; // Si ce n'est pas une chaîne, on retourne une chaîne vide
+  }
   return str.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu,"");
 }
 
@@ -104,8 +107,8 @@ input.addEventListener("input", () => {
   if (q.length === 0) return;
 
   const results = pokemonList.filter(p =>
-    normalize(p.name).startsWith(q) ||
-    normalize(p.num).startsWith(q)
+    normalize(p.name).startsWith(q) ||  // Recherche par nom
+    normalize(p.num).startsWith(q)     // Recherche par numéro
   ).slice(0, 10);
 
   console.log(results);  // Affiche les résultats filtrés dans la console
