@@ -81,7 +81,7 @@ body {
 <div id="loading">Chargement de la liste des Pokémon...</div>
 
 <script>
-// Fonction de normalisation
+// Normalisation sécurisée
 function normalize(str) {
   if (!str) return "";
   return String(str).toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
@@ -97,20 +97,20 @@ const loadingDiv = document.getElementById("loading");
 fetch("https://NeedLexHD.github.io/pokedex-search/pokemon.json")
   .then(res => res.json())
   .then(data => {
-    // Transforme chaque Pokémon pour garder id, num et name.fr
+    // Extraire uniquement id, num et name.fr
     pokemonList = data.map(p => ({
-      id: p.id,
-      num: p.num,
+      id: p.pokedex_id,
+      num: String(p.pokedex_id).padStart(3, "0"),
       name: p.name.fr
     }));
     isLoaded = true;
-    input.disabled = false;  // Activer la barre de recherche
+    input.disabled = false;
     loadingDiv.style.display = "none";
     console.log("Liste des Pokémon chargée !");
   })
   .catch(err => console.error("Erreur JSON:", err));
 
-// Événement input
+// Événement input pour autocomplete
 input.addEventListener("input", () => {
   if (!isLoaded) return;
 
