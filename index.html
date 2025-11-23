@@ -1,3 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Recherche Pokédex FR</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+}
+
+.search-container {
+  position: relative;
+  width: 320px;
+  margin: 20px auto;
+}
+
+#search {
+  width: 100%;
+  padding: 10px 40px 10px 12px;
+  font-size: 16px;
+  border-radius: 20px;
+  border: 1px solid #aaa;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#search:focus {
+  outline: none;
+  border-color: #ffcb05;
+  box-shadow: 0 0 5px rgba(255,203,5,0.6);
+}
+
+#search-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: #888;
+  pointer-events: none;
+}
+
+#suggestions {
+  width: 100%;
+  border: 1px solid #ccc;
+  background: white;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  border-radius: 0 0 15px 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  z-index: 9999;
+}
+
+.suggestion {
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background 0.2s;
+}
+
+.suggestion:hover {
+  background: #f2f2f2;
+}
+</style>
+</head>
+<body>
+
+<div class="search-container">
+  <input type="text" id="search" placeholder="Rechercher un Pokémon..." autocomplete="off">
+  <span id="search-icon">&#128269;</span>
+  <div id="suggestions"></div>
+</div>
+
 <script>
 // Charger la liste des Pokémon depuis l'API Tyradex
 let pokemonList = [];
@@ -45,17 +119,7 @@ input.addEventListener("input", () => {
   });
 });
 
-// Vérifie si une URL Google Sites existe (technique proxy Google)
-function checkURLExists(url) {
-  return fetch("https://www.google.com/url?q=" + encodeURIComponent(url), {
-    method: "HEAD",
-    mode: "no-cors"
-  })
-  .then(() => true)
-  .catch(() => false);
-}
-
-// Génération de l'URL correcte + test 404 + redirection
+// Génération de l'URL correcte (001-049, 050-098, etc.)
 function openPokemon(p) {
   const num = p.num;
   const nameSlug = encodeForURL(p.name);
@@ -73,13 +137,10 @@ function openPokemon(p) {
   const folder = `pokedex-${startStr}-${endStr}`;
   const url = `https://sites.google.com/view/lex3d/${folder}/${num}-${nameSlug}`;
 
-  // Vérifier l'existence
-  checkURLExists(url).then(exists => {
-    if (exists) {
-      window.location.href = url;       // OK → page trouvée
-    } else {
-      window.location.href = "https://sites.google.com/view/lex3d/accueil";  // ❌ → redirection accueil
-    }
-  });
+  console.log(url);
+  window.location.href = url;
 }
 </script>
+
+</body>
+</html>
