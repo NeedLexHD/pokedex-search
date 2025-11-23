@@ -125,15 +125,15 @@ function openPokemon(p) {
   const nameSlug = encodeForURL(p.name); // Utilise la fonction pour encoder le nom
   const n = p.id;
 
-  // Calcul de la plage correcte (001-049, 050-099, etc.)
-  let start = Math.floor((n - 1) / 50) * 50 + 1;
-  let end = start + 49;
+  // Calcul de l'intervalle correct (001-049, 050-099, etc.)
+  const start = Math.floor((n - 1) / 50) * 50 + 1;
+  const end = start + 49;
 
-  // Correction de l'intervalle : en fait, il faut ajuster la plage si l'ID est supérieur à 1025
-  if (end > 1025) end = 1025;  // Pour ne pas dépasser 1025 Pokémon
-  
+  // Correction de l'intervalle : assure que l'ID ne dépasse pas 1025
+  const endFinal = end > 1025 ? 1025 : end;  // Pas plus de 1025 Pokémon
+
   const startStr = String(start).padStart(3, '0');
-  const endStr = String(end).padStart(3, '0');
+  const endStr = String(endFinal).padStart(3, '0');
 
   // **REMPLACER "pokédex" PAR "pokedex" SANS ACCENT**
   const folder = `pokedex-${startStr}-${endStr}`; // Le dossier sera formaté correctement
