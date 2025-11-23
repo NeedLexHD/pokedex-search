@@ -62,42 +62,58 @@ body {
 .suggestion:hover {
   background: #f2f2f2;
 }
+
+#loading {
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+  margin-top: 10px;
+}
 </style>
 </head>
 <body>
 
 <div class="search-container">
-  <input type="text" id="search" placeholder="Rechercher un Pokémon..." autocomplete="off">
+  <input type="text" id="search" placeholder="Rechercher un Pokémon..." autocomplete="off" disabled>
   <span id="search-icon">&#128269;</span>
   <div id="suggestions"></div>
 </div>
+<div id="loading">Chargement de la liste des Pokémon...</div>
 
 <script>
-// Charger la liste des Pokémon depuis ton JSON GitHub Pages
-let pokemonList = [];
+// Fonction de normalisation
+function normalize(str) {
+  if (!str) return "";
+  return String(str).toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+}
 
+let pokemonList = [];
+let isLoaded = false;
+const input = document.getElementById("search");
+const container = document.getElementById("suggestions");
+const loadingDiv = document.getElementById("loading");
+
+// Charger le JSON depuis GitHub Pages
 fetch("https://NeedLexHD.github.io/pokedex-search/pokemon.json")
   .then(res => res.json())
   .then(data => {
-    pokemonList = data;
+    // Transforme chaque Pokémon pour garder id, num et name.fr
+    pokemonList = data.map(p => ({
+      id: p.id,
+      num: p.num,
+      name: p.name.fr
+    }));
+    isLoaded = true;
+    input.disabled = false;  // Activer la barre de recherche
+    loadingDiv.style.display = "none";
     console.log("Liste des Pokémon chargée !");
   })
   .catch(err => console.error("Erreur JSON:", err));
 
-// Normalisation (sans accents)
-function normalize(str) {
-  return str.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
-}
-
-// Encodage pour les URLs
-function encodeForURL(str) {
-  return encodeURIComponent(normalize(str));
-}
-
-const input = document.getElementById("search");
-const container = document.getElementById("suggestions");
-
+// Événement input
 input.addEventListener("input", () => {
+  if (!isLoaded) return;
+
   const q = normalize(input.value);
   container.innerHTML = "";
   if (q.length === 0) return;
@@ -116,10 +132,10 @@ input.addEventListener("input", () => {
   });
 });
 
-// Génération de l'URL Google Sites
+// Redirection vers Google Sites
 function openPokemon(p) {
   const num = p.num;
-  const nameSlug = encodeForURL(p.name);
+  const nameSlug = encodeURIComponent(normalize(p.name));
   const n = p.id;
 
   // Tranches de 49 Pokémon
