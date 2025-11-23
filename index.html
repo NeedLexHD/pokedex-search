@@ -76,11 +76,11 @@ body {
 // Initialisation d'un tableau vide pour stocker les Pokémon
 let pokemonList = [];
 
-// Fonction pour récupérer les Pokémon depuis l'API Tyradex
-fetch("https://tyradex.app/api/v1/pokemon")
+// Récupérer la liste des Pokémon en FR depuis Tyradex
+fetch("https://cors-anywhere.herokuapp.com/https://tyradex.app/api/v1/pokemon")
   .then(res => res.json())
   .then(data => {
-    // Une fois les données récupérées, on les ajoute à notre tableau pokemonList
+    console.log(data); // Affiche la réponse de l'API dans la console
     pokemonList = data.map(p => ({
       id: p.id,
       num: String(p.id).padStart(3, "0"),
@@ -89,29 +89,26 @@ fetch("https://tyradex.app/api/v1/pokemon")
   })
   .catch(err => console.error("Erreur Tyradex:", err));
 
-// Fonction pour normaliser les caractères (enlever les accents)
+// Normalisation des accents
 function normalize(str) {
-  if (typeof str !== 'string') {
-    return ''; // Si ce n'est pas une chaîne, on retourne une chaîne vide
-  }
-  return str.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+  return str.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu,"");
 }
 
 const input = document.getElementById("search");
 const container = document.getElementById("suggestions");
 
 input.addEventListener("input", () => {
-  const query = normalize(input.value);
+  const q = normalize(input.value);
+  console.log(q);  // Affiche la valeur de la recherche dans la console
   container.innerHTML = "";
-  if (query.length === 0) return;
+  if (q.length === 0) return;
 
-  // Filtrage des Pokémon
   const results = pokemonList.filter(p =>
-    normalize(p.name).startsWith(query) ||
-    normalize(p.num).startsWith(query)
+    normalize(p.name).startsWith(q) ||
+    normalize(p.num).startsWith(q)
   ).slice(0, 10);
 
-  // Affichage des suggestions
+  console.log(results);  // Affiche les résultats filtrés dans la console
   results.forEach(p => {
     const div = document.createElement("div");
     div.className = "suggestion";
@@ -121,11 +118,17 @@ input.addEventListener("input", () => {
   });
 });
 
-// Fonction de redirection vers la page Pokémon sur Google Sites
+// Redirection vers Google Sites
 function openPokemon(p) {
   const num = p.num;
-  const nameSlug = normalize(p.name).replace(/ /g, "-").replace(/'/g, "");
-  const url = `https://sites.google.com/view/lex3d/pokedex/${num}-${nameSlug}`;
+  const nameSlug = normalize(p.name).replace(/ /g,"-").replace(/'/g,"");
+  const n = p.id;
+  const start = Math.floor((n-1)/50)*50 + 1;
+  const end = start + 49;
+  const startStr = String(start).padStart(3, '0');
+  const endStr = String(end).padStart(3, '0');
+  const folder = `pokédex-${startStr}-${endStr}`;
+  const url = `https://sites.google.com/view/lex3d/${folder}/${num}-${nameSlug}`;
   window.location.href = url;
 }
 </script>
