@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Recherche Pokédex</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+}
+
+.search-container {
+  position: relative;
+  width: 320px;
+  margin: 20px;
+}
+
+#search {
+  width: 100%;
+  padding: 10px 40px 10px 12px; /* place pour la loupe */
+  font-size: 16px;
+  border-radius: 20px;
+  border: 1px solid #aaa;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#search:focus {
+  outline: none;
+  border-color: #ffcb05;
+  box-shadow: 0 0 5px rgba(255,203,5,0.6);
+}
+
+#search-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: #888;
+  pointer-events: none;
+}
+
+#suggestions {
+  width: 100%;
+  border: 1px solid #ccc;
+  background: white;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  border-radius: 0 0 15px 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  z-index: 9999;
+}
+
+.suggestion {
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background 0.2s;
+}
+
+.suggestion:hover {
+  background: #f2f2f2;
+}
+</style>
+</head>
+<body>
+
+<div class="search-container">
+  <input type="text" id="search" placeholder="Rechercher un Pokémon..." autocomplete="off">
+  <span id="search-icon">&#128269;</span>
+  <div id="suggestions"></div>
+</div>
+
+<script>
+// Charger liste Pokémon FR 1-1025
+let pokemonList = [];
+fetch("https://raw.githubusercontent.com/PokeAPI/pokedex-data/main/pokemon_fr_1_1025.json")
+  .then(r => r.json())
+  .then(data => {
+    data.forEach(p => {
+      pokemonList.push({
+        id: p.id,
+        num: String(p.id).padStart(3,"0"),
+        name: p.name
+      });
+    });
+  });
+
+// Fonctions utilitaires
+function normalize(str) {
+  return str.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu,"");
+}
+
+const input = document.getElementById("search");
+const container = document.getElementById("suggestions");
+
+// Autocomplétion
+input.addEventListener("input", () => {
+  const q = normalize(input.value);
+  container.innerHTML = "";
+  if (q.length === 0) return;
+
+  const results = pokemonList.filter(p =>
+    normalize(p.name).startsWith(q) ||
+    normalize(p.num).startsWith(q)
+  ).slice(0,10);
+
+  results.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "suggestion";
+    div.textContent = `${p.num} ${p.name}`;
+    div.onclick = () => openPokemon(p);
+    container.appendChild(div);
+  });
+});
+
+// Redirection vers Google Sites
+function openPokemon(p) {
+  const num = p.num;
+  const name = normalize(p.name).replace(/ /g,"-").replace(/'/g,"");
+
+  // Déterminer dossier (001-049, 050-099, etc.)
+  const n = p.id;
+  const start = Math.floor((n-1)/50)*50 + 1;
+  const end = start + 49;
+  const startStr = String(start).padStart(3,'0');
+  const endStr = String(end).padStart(3,'0');
+
+  const folder = `pokédex-${startStr}-${endStr}`;
+  const url = `https://sites.google.com/view/lex3d/${folder}/${num}-${name}`;
+
+  window.location.href = url;
+}
+</script>
+
+</body>
+</html>
