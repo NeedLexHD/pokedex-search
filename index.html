@@ -80,11 +80,11 @@ let pokemonList = [];
 fetch("https://cors-anywhere.herokuapp.com/https://tyradex.app/api/v1/pokemon")
   .then(res => res.json())
   .then(data => {
-    console.log(data);  // Affiche la réponse de l'API dans la console
+    console.log("Données récupérées :", data);  // Vérifier que les données sont bien récupérées
     pokemonList = data.map(p => ({
-      id: p.id,
-      num: String(p.id).padStart(3, "0"),
-      name: p.name   // nom français
+      id: p.pokedex_id,
+      num: String(p.pokedex_id).padStart(3, "0"),
+      name: p.name.fr   // Utiliser p.name.fr pour le nom en français
     }));
   })
   .catch(err => console.error("Erreur Tyradex:", err));
@@ -102,16 +102,19 @@ const container = document.getElementById("suggestions");
 
 input.addEventListener("input", () => {
   const q = normalize(input.value);
-  console.log(q);  // Affiche la valeur de la recherche dans la console
-  container.innerHTML = "";
-  if (q.length === 0) return;
+  console.log("Recherche :", q);  // Affiche la valeur de la recherche dans la console
+
+  container.innerHTML = ""; // Vider les suggestions précédentes
+  if (q.length === 0) return;  // Ne rien faire si la recherche est vide
 
   const results = pokemonList.filter(p =>
     normalize(p.name).startsWith(q) ||  // Recherche par nom
     normalize(p.num).startsWith(q)     // Recherche par numéro
-  ).slice(0, 10);
+  ).slice(0, 10); // Limite les résultats à 10 pour éviter un affichage trop lourd
 
-  console.log(results);  // Affiche les résultats filtrés dans la console
+  console.log("Résultats trouvés :", results); // Vérifie si les résultats sont trouvés
+
+  // Affiche les résultats dans le DOM
   results.forEach(p => {
     const div = document.createElement("div");
     div.className = "suggestion";
