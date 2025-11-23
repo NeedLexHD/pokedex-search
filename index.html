@@ -82,17 +82,17 @@ fetch("https://tyradex.app/api/v1/pokemon")
     pokemonList = data.map(p => ({
       id: p.pokedex_id,
       num: String(p.pokedex_id).padStart(3, "0"),
-      name: p.name.fr   // Utilise le nom en français
+      name: p.name.fr
     }));
   })
   .catch(err => console.error("Erreur Tyradex:", err));
 
-// Fonction de normalisation des accents
+// Normalisation (sans accents)
 function normalize(str) {
   return str.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
 }
 
-// Fonction d'encodeURIComponent pour la compatibilité URL
+// Encodage pour les URLs
 function encodeForURL(str) {
   return encodeURIComponent(normalize(str));
 }
@@ -119,28 +119,26 @@ input.addEventListener("input", () => {
   });
 });
 
-// Fonction pour rediriger vers la page Google Sites
+// Génération de l'URL correcte (001-049, 050-098, etc.)
 function openPokemon(p) {
   const num = p.num;
-  const nameSlug = encodeForURL(p.name); // Utilise la fonction pour encoder le nom
+  const nameSlug = encodeForURL(p.name);
   const n = p.id;
 
-  // Calcul de l'intervalle correct (001-049, 050-099, etc.)
-  const start = Math.floor((n - 1) / 50) * 50 + 1;
-  const end = start + 49;
+  // Tranches de 49 Pokémon
+  const start = Math.floor((n - 1) / 49) * 49 + 1;
+  let end = start + 48;
 
-  // Correction de l'intervalle : assure que l'ID ne dépasse pas 1025
-  const endFinal = end > 1025 ? 1025 : end;  // Pas plus de 1025 Pokémon
+  if (end > 1025) end = 1025;
 
   const startStr = String(start).padStart(3, '0');
-  const endStr = String(endFinal).padStart(3, '0');
+  const endStr = String(end).padStart(3, '0');
 
-  // **REMPLACER "pokédex" PAR "pokedex" SANS ACCENT**
-  const folder = `pokedex-${startStr}-${endStr}`; // Le dossier sera formaté correctement
+  const folder = `pokedex-${startStr}-${endStr}`;
   const url = `https://sites.google.com/view/lex3d/${folder}/${num}-${nameSlug}`;
 
-  console.log(url);  // Affiche l'URL générée pour vérification
-  window.location.href = url;  // Redirige vers l'URL
+  console.log(url);
+  window.location.href = url;
 }
 </script>
 
