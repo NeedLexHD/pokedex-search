@@ -73,28 +73,28 @@ body {
 </div>
 
 <script>
-// Initialisation d'un tableau vide pour stocker les Pokémon
+// Charger la liste des Pokémon depuis l'API Tyradex
 let pokemonList = [];
 
-// Récupérer la liste des Pokémon en FR depuis Tyradex
-fetch("https://cors-anywhere.herokuapp.com/https://tyradex.app/api/v1/pokemon")
+fetch("https://tyradex.app/api/v1/pokemon")
   .then(res => res.json())
   .then(data => {
-    console.log("Données récupérées :", data);  // Vérifier que les données sont bien récupérées
     pokemonList = data.map(p => ({
       id: p.pokedex_id,
       num: String(p.pokedex_id).padStart(3, "0"),
-      name: p.name.fr   // Utiliser p.name.fr pour le nom en français
+      name: p.name.fr   // Utilise le nom en français
     }));
   })
   .catch(err => console.error("Erreur Tyradex:", err));
 
-// Normalisation des accents
+// Fonction de normalisation des accents
 function normalize(str) {
-  if (typeof str !== 'string') {
-    return ''; // Si ce n'est pas une chaîne, on retourne une chaîne vide
-  }
-  return str.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu,"");
+  return str.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+}
+
+// Fonction d'encodeURIComponent pour la compatibilité URL
+function encodeForURL(str) {
+  return encodeURIComponent(normalize(str));
 }
 
 const input = document.getElementById("search");
@@ -102,19 +102,14 @@ const container = document.getElementById("suggestions");
 
 input.addEventListener("input", () => {
   const q = normalize(input.value);
-  console.log("Recherche :", q);  // Affiche la valeur de la recherche dans la console
-
-  container.innerHTML = ""; // Vider les suggestions précédentes
-  if (q.length === 0) return;  // Ne rien faire si la recherche est vide
+  container.innerHTML = "";
+  if (q.length === 0) return;
 
   const results = pokemonList.filter(p =>
-    normalize(p.name).startsWith(q) ||  // Recherche par nom
-    normalize(p.num).startsWith(q)     // Recherche par numéro
-  ).slice(0, 10); // Limite les résultats à 10 pour éviter un affichage trop lourd
+    normalize(p.name).startsWith(q) ||
+    normalize(p.num).startsWith(q)
+  ).slice(0, 10);
 
-  console.log("Résultats trouvés :", results); // Vérifie si les résultats sont trouvés
-
-  // Affiche les résultats dans le DOM
   results.forEach(p => {
     const div = document.createElement("div");
     div.className = "suggestion";
@@ -124,18 +119,26 @@ input.addEventListener("input", () => {
   });
 });
 
-// Redirection vers Google Sites
+// Fonction pour rediriger vers la page Google Sites
 function openPokemon(p) {
   const num = p.num;
-  const nameSlug = normalize(p.name).replace(/ /g,"-").replace(/'/g,"");
+  const nameSlug = encodeForURL(p.name); // Utilise la fonction pour encoder le nom
   const n = p.id;
-  const start = Math.floor((n-1)/50)*50 + 1;
+
+  // Calcul de la plage correcte (001-049, 050-099, etc.)
+  const start = Math.floor((n - 1) / 50) * 50 + 1;
   const end = start + 49;
+
+  // Ajuster l'intervalle si l'ID est supérieur à 1000
   const startStr = String(start).padStart(3, '0');
-  const endStr = String(end).padStart(3, '0');
-  const folder = `pokédex-${startStr}-${endStr}`;
+  const endStr = (end > 1025) ? String(1025).padStart(3, '0') : String(end).padStart(3, '0');
+
+  // Retirer l'accent de "pokédex" pour le chemin d'URL
+  const folder = `pokedex-${startStr}-${endStr}`;
   const url = `https://sites.google.com/view/lex3d/${folder}/${num}-${nameSlug}`;
-  window.location.href = url;
+
+  console.log(url);  // Affiche l'URL générée pour vérification
+  window.location.href = url;  // Redirige vers l'URL
 }
 </script>
 
